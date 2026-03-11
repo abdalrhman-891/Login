@@ -216,7 +216,7 @@
             db.ref('codes/' + code).once('value').then(snap => {
                 if(snap.val() === "active") {
                     localStorage.setItem('auth', 'true');
-                    window.location.href = "index.html"; // التحويل التلقائي لصفحة index
+                    window.location.href = "test.html"; // التحويل التلقائي لصفحة index
                 } else {
                     alert("الكود غير صحيح");
                 }
@@ -230,4 +230,5 @@
         }
     </script>
 </body>
+
 </html>
