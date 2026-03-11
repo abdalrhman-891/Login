@@ -1,31 +1,158 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<style>
-    /* إلغاء الهوامش الافتراضية للمتصفح */
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden; /* يمنع ظهور شريط التمرير الجانبي */
-}
+    <title>SmartCast | شاشة العرض</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
-/* جعل الفيديو يملأ الشاشة بالكامل */
-.full-screen-video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;    /* 100% من عرض الشاشة */
-    height: 100vh;   /* 100% من طول الشاشة */
-    border: none;
-}
-</style>
+    <style>
+        :root {
+            --accent: #38bdf8;
+            --bg: #020617;
+            --card: #1e293b;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* حاوية المشغل */
+        .video-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        .screen {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* نسبة 16:9 */
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            box-shadow: 0 0 50px rgba(56, 189, 248, 0.15);
+        }
+
+        /* الـ Iframe مع حماية Sandbox */
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* تفاصيل الفيلم */
+        .movie-details {
+            margin-top: 25px;
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            width: 100%;
+        }
+
+        .movie-details h1 {
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            color: var(--accent);
+        }
+
+        .movie-details p {
+            color: #94a3b8;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* زر الدعم العائم */
+        .support-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #25d366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        /* ميديا كويري للموبايل */
+        @media (max-width: 600px) {
+            .video-container { margin: 20px auto; }
+            .movie-details { border-radius: 0; }
+        }
+    </style>
+</head>
 <body>
-<iframe src="https://myvidplay.com/e/hfyxutloxj6t" width="300px" height="300px" class="full-screen-video" frameborder="0"></iframe>
-    <div class="player-wrapper">
+
+    <div class="video-container">
+        <div class="screen">
+            <iframe 
+                id="cast-player"
+                src="about:blank" 
+                sandbox="allow-forms allow-scripts allow-same-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="movie-details">
+            <h1 id="m-title">جاري التحميل...</h1>
+            <p id="m-desc">يرجى الانتظار، يتم تحضير أفضل جودة للسيرفر حالياً.</p>
+        </div>
+    </div>
+
+    <a href="https://wa.me/201028925579" class="support-btn" target="_blank">
+        <span>واجهت مشكلة؟ تواصل معنا</span>
+    </a>
+
+    <script>
+        // إعدادات Firebase الخاصة بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAmqIzExfgc7ny46z5tdlTpujFY3shAyQ",
+            authDomain: "smart-cart-c1dbd.firebaseapp.com",
+            projectId: "smart-cart-c1dbd",
+            databaseURL: "https://smart-cart-c1dbd-default-rtdb.firebaseio.com",
+            storageBucket: "smart-cart-c1dbd.appspot.com",
+            messagingSenderId: "777421118167",
+            appId: "1:777421118167:web:27f29f4f466b0a886f68ba"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // وظيفة جلب الفيديو من Firebase
+        function loadVideo() {
+            // هنقرأ من فرع اسمه 'video_config'
+            db.ref('video_config').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById('cast-player').src = data.url;
+                    document.getElementById('m-title').innerText = data.title;
+                    document.getElementById('m-desc').innerText = data.description;
+                }
+            });
+        }
+
+        window.onload = loadVideo;
+    </script>
 </body>
+</html>
