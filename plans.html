@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartCast | خطط الاشتراك</title>
+    <style>
+        :root {
+            --gemini-blue: #1a73e8;
+            --gemini-bg: #f8f9fa;
+            --gemini-card: #ffffff;
+            --text-dark: #202124;
+            --text-light: #5f6368;
+        }
+
+        body {
+            background-color: var(--gemini-bg);
+            color: var(--text-dark);
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 { font-size: 2.5rem; font-weight: 400; margin-bottom: 10px; text-align: center; }
+        .subtitle { color: var(--text-light); margin-bottom: 50px; text-align: center; max-width: 600px; }
+
+        /* حاوية الكروت */
+        .plans-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: var(--gemini-card);
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            width: 350px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* تمييز الكارت السنوي (زي Gemini Advanced) */
+        .card.featured {
+            border: 2px solid var(--gemini-blue);
+            position: relative;
+        }
+
+        .plan-title { font-size: 22px; font-weight: 500; margin: 0; }
+        .plan-desc { color: var(--text-light); font-size: 14px; margin: 12px 0 24px; min-height: 40px; }
+        
+        .price-box { margin-bottom: 24px; }
+        .current-price { font-size: 28px; font-weight: 500; }
+        .old-price { text-decoration: line-through; color: #9aa0a6; font-size: 16px; margin-right: 8px; }
+        .price-sub { display: block; font-size: 12px; color: var(--text-light); margin-top: 4px; }
+
+        .btn-action {
+            background-color: var(--gemini-blue);
+            color: white;
