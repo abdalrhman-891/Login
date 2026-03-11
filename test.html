@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    /* إلغاء الهوامش الافتراضية للمتصفح */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* يمنع ظهور شريط التمرير الجانبي */
+}
+
+/* جعل الفيديو يملأ الشاشة بالكامل */
+.full-screen-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;    /* 100% من عرض الشاشة */
+    height: 100vh;   /* 100% من طول الشاشة */
+    border: none;
+}
+</style>
+<body>
+<iframe src="https://myvidplay.com/e/hfyxutloxj6t" width="300px" height="300px" class="full-screen-video" frameborder="0"></iframe>
+    <div class="player-wrapper">
+</body>
