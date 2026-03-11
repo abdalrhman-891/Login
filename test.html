@@ -1,250 +1,91 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartCast | تجربة سينمائية فريدة</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+<style>
+    .episodes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 30px;
+        padding: 20px;
+        background: var(--card);
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    .episode-item {
+        background: #1f2937;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: 0.3s;
+        border: 1px solid transparent;
+    }
+    .episode-item:hover {
+        background: var(--primary);
+        color: black;
+        transform: translateY(-5px);
+    }
+    .active-ep {
+        border-color: var(--primary);
+        box-shadow: 0 0 15px var(--glow);
+    }
+</style>
 
-    <style>
-        :root {
-            --primary: #38bdf8;
-            --accent: #818cf8;
-            --bg: #030712;
-            --card: rgba(17, 24, 39, 0.7);
-            --glow: rgba(56, 189, 248, 0.15);
-        }
-
-        body {
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, var(--bg) 80%);
-            color: #f9fafb;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* --- Navbar --- */
-        nav {
-            width: 100%;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 6%;
-            box-sizing: border-box;
-            background: rgba(3, 7, 18, 0.5);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: 900;
-            background: linear-gradient(to right, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-        }
-
-        /* --- Video Player Section --- */
-        .player-wrapper {
-            width: 100%;
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
-
-        .video-card {
-            background: #000;
-            border-radius: 28px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            box-shadow: 0 0 40px var(--glow);
-            aspect-ratio: 16 / 9;
-        }
-
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
-
-        /* حماية ضد أول ضغطة (مانع إعلانات ذكي) */
-        .player-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            cursor: pointer;
-            transition: 0.5s;
-        }
-
-        .play-btn {
-            width: 80px; height: 80px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 30px var(--primary);
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-        .play-btn:hover { transform: scale(1.1); box-shadow: 0 0 50px var(--primary); }
-
-        /* --- Movie Details --- */
-        .details-container {
-            width: 100%;
-            max-width: 1100px;
-            padding: 0 20px;
-            margin-bottom: 60px;
-            box-sizing: border-box;
-        }
-
-        .info-glass {
-            background: var(--card);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 30px;
-            border-radius: 24px;
-            margin-top: -30px;
-            position: relative;
-            z-index: 20;
-        }
-
-        .info-glass h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; }
-        .info-glass p { color: #9ca3af; line-height: 1.7; font-size: 16px; margin: 0; }
-
-        /* --- Footer (Shahid Style) --- */
-        footer {
-            width: 100%;
-            background: #020617;
-            padding: 50px 0;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            text-align: center;
-        }
-
-        .wa-support {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(37, 211, 102, 0.1);
-            color: #25d366;
-            padding: 12px 25px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            border: 1px solid #25d366;
-            transition: 0.3s;
-        }
-        .wa-support:hover { background: #25d366; color: #000; }
-
-        @media (max-width: 768px) {
-            .video-card { border-radius: 15px; }
-            .info-glass { padding: 20px; border-radius: 15px; }
-        }
-    </style>
-</head>
-<body>
-
-    <nav>
-        <div class="logo">SmartCast</div>
-        <div style="font-size: 14px; color: var(--primary); font-weight: bold;">باقة Premium نشطة ✅</div>
-    </nav>
-
-    <div class="player-wrapper">
-        <div class="video-card">
-            <div id="overlay" class="player-overlay" onclick="launchVideo()">
-                <div class="play-btn">
-                    <svg width="30" height="30" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
-                </div>
-                <span style="font-weight: bold; letter-spacing: 1px;">انقر للمشاهدة الآمنة</span>
+<div class="details-container">
+    <div class="info-glass">
+        <h1 id="m-title">جاري تحميل المسلسل...</h1>
+        <p id="m-desc">اختر الحلقة التي تود مشاهدتها من القائمة أدناه.</p>
+        
+        <h3 style="margin-top: 25px; color: var(--primary);">الحلقات المتوفرة:</h3>
+        <div id="episodes-list" class="episodes-grid">
             </div>
-
-            <iframe 
-                id="main-player"
-                src="" 
-                sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" 
-                allowfullscreen>
-            </iframe>
-        </div>
     </div>
+</div>
 
-    <div class="details-container">
-        <div class="info-glass">
-            <h1 id="m-title">جاري تحميل البيانات...</h1>
-            <p id="m-desc">نحن نقوم الآن بالاتصال بسيرفر SmartCast لتوفير أفضل جودة عرض ممكنة بدون إعلانات مزعجة.</p>
-        </div>
-    </div>
+<script>
+    // تعديل كود الـ JavaScript عشان يجيب قائمة الحلقات
+    function loadSeriesData() {
+        const seriesName = "المداح"; // ممكن تخليها ديناميكية لاحقاً
+        
+        db.ref(`Series/${seriesName}/Season_1`).on('value', (snapshot) => {
+            const episodes = snapshot.val();
+            const listContainer = document.getElementById('episodes-list');
+            listContainer.innerHTML = ""; // تنظيف القائمة
 
-    <footer>
-        <p style="color: #4b5563; font-size: 14px; margin-bottom: 20px;">تواجه مشكلة في العرض؟ فريق الدعم متاح 24/7</p>
-        <a href="#" onclick="toSupport()" class="wa-support">
-            <span>تواصل مع الدعم الفني</span>
-        </a>
-    </footer>
-
-    <script>
-        // إعدادات Firebase الخاصة بك
-        const firebaseConfig = {
-            apiKey: "AIzaSyBAmqIzExfgc7ny46z5tdlTpujFY3shAyQ",
-            authDomain: "smart-cart-c1dbd.firebaseapp.com",
-            projectId: "smart-cart-c1dbd",
-            databaseURL: "https://smart-cart-c1dbd-default-rtdb.firebaseio.com",
-            storageBucket: "smart-cart-c1dbd.appspot.com",
-            messagingSenderId: "777421118167",
-            appId: "1:777421118167:web:27f29f4f466b0a886f68ba"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        let finalUrl = "";
-
-        function loadData() {
-            db.ref('video_config').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    finalUrl = data.url;
-                    document.getElementById('m-title').innerText = data.title;
-                    document.getElementById('m-desc').innerText = data.description;
-                }
-            });
-        }
-
-        function launchVideo() {
-            if(finalUrl) {
-                document.getElementById('main-player').src = finalUrl;
-                document.getElementById('overlay').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('overlay').style.display = 'none';
-                }, 500);
-            } else {
-                alert("السيرفر مشغول حالياً، يرجى المحاولة بعد قليل.");
+            if (episodes) {
+                Object.keys(episodes).forEach((key) => {
+                    const ep = episodes[key];
+                    const epDiv = document.createElement('div');
+                    epDiv.className = "episode-item";
+                    epDiv.innerText = "حلقة " + key.replace("Episode_", "");
+                    
+                    epDiv.onclick = () => {
+                        changeEpisode(ep.url, ep.title, ep.description);
+                        // تمييز الحلقة الحالية
+                        document.querySelectorAll('.episode-item').forEach(el => el.classList.remove('active-ep'));
+                        epDiv.classList.add('active-ep');
+                    };
+                    
+                    listContainer.appendChild(epDiv);
+                });
             }
-        }
+        });
+    }
 
-        function toSupport() {
-            const num = "201028925579";
-            window.open(`https://wa.me/${num}?text=مرحباً، لدي استفسار بخصوص خدمة SmartCast`, '_blank');
-        }
+    function changeEpisode(url, title, desc) {
+        finalUrl = url;
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-desc').innerText = desc;
+        
+        // إظهار الغطاء مرة تانية عشان المشاهد يدوس Play
+        document.getElementById('overlay').style.display = 'flex';
+        document.getElementById('overlay').style.opacity = '1';
+        
+        const player = document.getElementById('main-player');
+        player.src = url;
+        player.load();
+    }
 
-        window.onload = loadData;
-    </script>
-</body>
-</html>
+    window.onload = () => {
+        loadData(); // دالتك القديمة
+        loadSeriesData(); // الدالة الجديدة للحلقات
+    };
+</script>
