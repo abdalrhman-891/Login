@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartCast | لوحة التحكم</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        body { background: #030712; color: white; font-family: sans-serif; padding: 50px; }
+        .admin-card { background: #111827; padding: 30px; border-radius: 20px; border: 1px solid #38bdf8; max-width: 500px; margin: auto; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #374151; background: #1f2937; color: white; }
+        button { width: 100%; padding: 15px; background: #38bdf8; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #0ea5e9; transform: scale(1.02); }
+    </style>
+</head>
+<body>
+
+<div class="admin-card">
+    <h2 style="text-align: center; color: #38bdf8;">إضافة مسلسل/حلقة جديدة</h2>
+    
+    <input type="text" id="series_name" placeholder="اسم المسلسل (مثل: المداح)">
+    <input type="number" id="season_num" placeholder="رقم الموسم">
+    <input type="number" id="episode_num" placeholder="رقم الحلقة">
+    <input type="text" id="video_url" placeholder="ضع رابط التليجرام المباشر هنا (.mp4)">
+    <textarea id="description" placeholder="وصف مختصر للحلقة"></textarea>
+    
+    <button onclick="saveToFirebase()">حفظ البيانات في السيرفر ✅</button>
+    <p id="status" style="text-align: center; font-size: 14px;"></p>
+</div>
+
+<script>
+    // إعدادات Firebase بتاعتك
+    const firebaseConfig = {
+        apiKey: "AIzaSyBAmqIzExfgc7ny46z5tdlTpujFY3shAyQ",
+        authDomain: "smart-cart-c1dbd.firebaseapp.com",
+        projectId: "smart-cart-c1dbd",
+        databaseURL: "https://smart-cart-c1dbd-default-rtdb.firebaseio.com",
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function saveToFirebase() {
+        const name = document.getElementById('series_name').value;
+        const season = document.getElementById('season_num').value;
+        const episode = document.getElementById('episode_num').value;
+        const url = document.getElementById('video_url').value;
+        const desc = document.getElementById('description').value;
+
+        if(!name || !url) { alert("أرجوك املأ البيانات الأساسية!"); return; }
+
+        // تنظيم البيانات: Series > Name > Season > Episode
+        const path = `Series/${name}/Season_${season}/Episode_${episode}`;
+
+        db.ref(path).set({
+            title: name + " - حلقة " + episode,
+            url: url,
+            description: desc,
+            timestamp: Date.now()
+        }).then(() => {
+            document.getElementById('status').innerText = "تم الحفظ بنجاح! 🚀";
+            document.getElementById('video_url').value = ""; // تفريغ الخانة للحلقة الجاية
+        }).catch((error) => {
+            document.getElementById('status').innerText = "خطأ: " + error.message;
+        });
+    }
+</script>
+
+</body>
+</html>
