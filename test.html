@@ -3,126 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartCast | شاشة العرض</title>
+    <title>SmartCast | تجربة سينمائية فريدة</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
     <style>
         :root {
-            --accent: #38bdf8;
-            --bg: #020617;
-            --card: #1e293b;
+            --primary: #38bdf8;
+            --accent: #818cf8;
+            --bg: #030712;
+            --card: rgba(17, 24, 39, 0.7);
+            --glow: rgba(56, 189, 248, 0.15);
         }
 
         body {
             background-color: var(--bg);
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
+            background-image: radial-gradient(circle at 50% -20%, #1e293b 0%, var(--bg) 80%);
+            color: #f9fafb;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             margin: 0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
 
-        /* حاوية المشغل */
-        .video-container {
+        /* --- Navbar --- */
+        nav {
             width: 100%;
-            max-width: 1000px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            box-sizing: border-box;
+            background: rgba(3, 7, 18, 0.5);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        /* --- Video Player Section --- */
+        .player-wrapper {
+            width: 100%;
+            max-width: 1100px;
             margin: 40px auto;
-            padding: 0 15px;
+            padding: 0 20px;
             box-sizing: border-box;
         }
 
-        .screen {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* نسبة 16:9 */
+        .video-card {
             background: #000;
-            border-radius: 20px;
+            border-radius: 28px;
+            position: relative;
             overflow: hidden;
-            border: 1px solid #334155;
-            box-shadow: 0 0 50px rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 40px var(--glow);
+            aspect-ratio: 16 / 9;
         }
 
-        /* الـ Iframe مع حماية Sandbox */
         iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             border: none;
+            display: block;
         }
 
-        /* تفاصيل الفيلم */
-        .movie-details {
-            margin-top: 25px;
-            background: var(--card);
-            padding: 25px;
-            border-radius: 15px;
-            width: 100%;
+        /* حماية ضد أول ضغطة (مانع إعلانات ذكي) */
+        .player-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            cursor: pointer;
+            transition: 0.5s;
         }
 
-        .movie-details h1 {
-            margin: 0 0 10px 0;
-            font-size: 24px;
-            color: var(--accent);
-        }
-
-        .movie-details p {
-            color: #94a3b8;
-            line-height: 1.6;
-            font-size: 15px;
-        }
-
-        /* زر الدعم العائم */
-        .support-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: #25d366;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: bold;
+        .play-btn {
+            width: 80px; height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            z-index: 100;
+            justify-content: center;
+            box-shadow: 0 0 30px var(--primary);
+            margin-bottom: 15px;
+            transition: 0.3s;
+        }
+        .play-btn:hover { transform: scale(1.1); box-shadow: 0 0 50px var(--primary); }
+
+        /* --- Movie Details --- */
+        .details-container {
+            width: 100%;
+            max-width: 1100px;
+            padding: 0 20px;
+            margin-bottom: 60px;
+            box-sizing: border-box;
         }
 
-        /* ميديا كويري للموبايل */
-        @media (max-width: 600px) {
-            .video-container { margin: 20px auto; }
-            .movie-details { border-radius: 0; }
+        .info-glass {
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 24px;
+            margin-top: -30px;
+            position: relative;
+            z-index: 20;
+        }
+
+        .info-glass h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; }
+        .info-glass p { color: #9ca3af; line-height: 1.7; font-size: 16px; margin: 0; }
+
+        /* --- Footer (Shahid Style) --- */
+        footer {
+            width: 100%;
+            background: #020617;
+            padding: 50px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        .wa-support {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(37, 211, 102, 0.1);
+            color: #25d366;
+            padding: 12px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid #25d366;
+            transition: 0.3s;
+        }
+        .wa-support:hover { background: #25d366; color: #000; }
+
+        @media (max-width: 768px) {
+            .video-card { border-radius: 15px; }
+            .info-glass { padding: 20px; border-radius: 15px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="video-container">
-        <div class="screen">
+    <nav>
+        <div class="logo">SmartCast</div>
+        <div style="font-size: 14px; color: var(--primary); font-weight: bold;">باقة Premium نشطة ✅</div>
+    </nav>
+
+    <div class="player-wrapper">
+        <div class="video-card">
+            <div id="overlay" class="player-overlay" onclick="launchVideo()">
+                <div class="play-btn">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="black"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <span style="font-weight: bold; letter-spacing: 1px;">انقر للمشاهدة الآمنة</span>
+            </div>
+
             <iframe 
-                id="cast-player"
-                src="about:blank" 
-                sandbox="allow-forms allow-scripts allow-same-origin" 
+                id="main-player"
+                src="" 
+                sandbox="allow-forms allow-scripts allow-same-origin allow-presentation" 
                 allowfullscreen>
             </iframe>
         </div>
+    </div>
 
-        <div class="movie-details">
-            <h1 id="m-title">جاري التحميل...</h1>
-            <p id="m-desc">يرجى الانتظار، يتم تحضير أفضل جودة للسيرفر حالياً.</p>
+    <div class="details-container">
+        <div class="info-glass">
+            <h1 id="m-title">جاري تحميل البيانات...</h1>
+            <p id="m-desc">نحن نقوم الآن بالاتصال بسيرفر SmartCast لتوفير أفضل جودة عرض ممكنة بدون إعلانات مزعجة.</p>
         </div>
     </div>
 
-    <a href="https://wa.me/201028925579" class="support-btn" target="_blank">
-        <span>واجهت مشكلة؟ تواصل معنا</span>
-    </a>
+    <footer>
+        <p style="color: #4b5563; font-size: 14px; margin-bottom: 20px;">تواجه مشكلة في العرض؟ فريق الدعم متاح 24/7</p>
+        <a href="#" onclick="toSupport()" class="wa-support">
+            <span>تواصل مع الدعم الفني</span>
+        </a>
+    </footer>
 
     <script>
         // إعدادات Firebase الخاصة بك
@@ -138,21 +214,37 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        let finalUrl = "";
 
-        // وظيفة جلب الفيديو من Firebase
-        function loadVideo() {
-            // هنقرأ من فرع اسمه 'video_config'
+        function loadData() {
             db.ref('video_config').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    document.getElementById('cast-player').src = data.url;
+                    finalUrl = data.url;
                     document.getElementById('m-title').innerText = data.title;
                     document.getElementById('m-desc').innerText = data.description;
                 }
             });
         }
 
-        window.onload = loadVideo;
+        function launchVideo() {
+            if(finalUrl) {
+                document.getElementById('main-player').src = finalUrl;
+                document.getElementById('overlay').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('overlay').style.display = 'none';
+                }, 500);
+            } else {
+                alert("السيرفر مشغول حالياً، يرجى المحاولة بعد قليل.");
+            }
+        }
+
+        function toSupport() {
+            const num = "201028925579";
+            window.open(`https://wa.me/${num}?text=مرحباً، لدي استفسار بخصوص خدمة SmartCast`, '_blank');
+        }
+
+        window.onload = loadData;
     </script>
 </body>
 </html>
